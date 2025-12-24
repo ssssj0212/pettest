@@ -48,9 +48,9 @@ export default function Header() {
           Rover 스타일 서비스
         </Link>
 
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2 sm:gap-4">
           {loading ? (
-            <span className="text-sm text-gray-500">로딩 중...</span>
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
           ) : user ? (
             <>
               <span className="text-sm text-gray-600">

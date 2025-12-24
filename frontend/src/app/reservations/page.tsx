@@ -12,6 +12,7 @@ import {
   getToken,
   type Reservation,
 } from "@/lib/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -26,6 +27,7 @@ export default function ReservationsPage() {
     Record<string, Array<{ id: number; time: string; status: string }>>
   >({});
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -36,8 +38,15 @@ export default function ReservationsPage() {
       return;
     }
 
-    loadReservations();
-    loadCalendarData();
+    const init = async () => {
+      setPageLoading(true);
+      try {
+        await Promise.all([loadReservations(), loadCalendarData()]);
+      } finally {
+        setPageLoading(false);
+      }
+    };
+    init();
   }, [currentMonth, router]);
 
   const loadReservations = async () => {
@@ -128,6 +137,14 @@ export default function ReservationsPage() {
     }
     return null;
   };
+
+  if (pageLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-gray-50">
+        <LoadingSpinner size="lg" />
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
