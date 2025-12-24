@@ -146,6 +146,14 @@ export async function getReservations() {
   return apiCall<Reservation[]>("/reservations");
 }
 
+export async function getCalendarSummary(year: number, month: number) {
+  return apiCall<{
+    year: number;
+    month: number;
+    reservations: Record<string, Array<{ id: number; time: string; status: string }>>;
+  }>(`/reservations/calendar?year=${year}&month=${month}`);
+}
+
 export async function getReservation(id: number) {
   return apiCall<Reservation>(`/reservations/${id}`);
 }

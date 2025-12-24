@@ -14,7 +14,7 @@ export default async function Home() {
     {
       title: "예약하기",
       desc: "달력에서 시간 선택, 예약 생성/변경/취소",
-      href: "#reservations",
+      href: "/reservations",
     },
     {
       title: "반려견 서비스",

@@ -1,11 +1,12 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 
 from ..database import get_db
 from .. import models, schemas
-from ..auth import get_current_active_user
+from ..auth import get_current_active_user, get_current_admin_user
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
@@ -44,6 +45,52 @@ def list_reservations(
         .all()
     )
     return reservations
+
+
+@router.get("/calendar")
+def get_calendar_summary(
+    year: int,
+    month: int,
+    current_user: models.User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """달력 요약: 특정 월의 예약된 날짜 목록 반환"""
+    start_date = datetime(year, month, 1)
+    if month == 12:
+        end_date = datetime(year + 1, 1, 1)
+    else:
+        end_date = datetime(year, month + 1, 1)
+
+    reservations = (
+        db.query(models.Reservation)
+        .filter(
+            and_(
+                models.Reservation.user_id == current_user.id,
+                models.Reservation.reserved_at >= start_date,
+                models.Reservation.reserved_at < end_date,
+                models.Reservation.status != "CANCELED",
+            )
+        )
+        .all()
+    )
+
+    # 날짜별로 그룹화
+    dates = {}
+    for r in reservations:
+        day = r.reserved_at.date()
+        if day not in dates:
+            dates[day] = []
+        dates[day].append({
+            "id": r.id,
+            "time": r.reserved_at.strftime("%H:%M"),
+            "status": r.status,
+        })
+
+    return {
+        "year": year,
+        "month": month,
+        "reservations": {str(k): v for k, v in dates.items()},
+    }
 
 
 @router.get("/{reservation_id}", response_model=schemas.ReservationRead)
@@ -118,4 +165,3 @@ def cancel_reservation(
     reservation.status = "CANCELED"
     db.commit()
     return {"message": "예약이 취소되었습니다."}
-
