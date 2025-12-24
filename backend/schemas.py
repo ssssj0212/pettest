@@ -17,6 +17,7 @@ class UserCreate(UserBase):
 
 class UserRead(UserBase):
     id: int
+    role: str
     is_active: bool
     created_at: datetime
 
@@ -30,7 +31,13 @@ class ReservationBase(BaseModel):
 
 
 class ReservationCreate(ReservationBase):
-    user_id: int
+    pass  # user_id는 현재 로그인한 사용자로 자동 설정
+
+
+class ReservationUpdate(BaseModel):
+    reserved_at: Optional[datetime] = None
+    memo: Optional[str] = None
+    status: Optional[str] = None
 
 
 class ReservationRead(ReservationBase):
