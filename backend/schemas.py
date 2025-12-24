@@ -79,13 +79,65 @@ class OrderItemRead(BaseModel):
         from_attributes = True
 
 
+class OrderCreate(BaseModel):
+    items: List[dict]  # [{"product_id": int, "quantity": int}]
+    payment_method: str  # CARD / VENMO / CASH
+
+
 class OrderRead(BaseModel):
     id: int
     user_id: int
     total_amount: Decimal
     status: str
+    payment_method: Optional[str] = None
+    payment_status: str
     created_at: datetime
     items: List[OrderItemRead] = []
+
+    class Config:
+        from_attributes = True
+
+
+class PaymentIntentCreate(BaseModel):
+    order_id: int
+    payment_method: str  # CARD / VENMO / CASH
+
+
+class ReviewBase(BaseModel):
+    rating: int  # 1-5
+    comment: Optional[str] = None
+
+
+class ReviewCreate(ReviewBase):
+    reservation_id: Optional[int] = None
+    order_id: Optional[int] = None
+
+
+class ReviewRead(ReviewBase):
+    id: int
+    user_id: int
+    reservation_id: Optional[int] = None
+    order_id: Optional[int] = None
+    created_at: datetime
+    user_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class GalleryBase(BaseModel):
+    image_url: str
+    caption: Optional[str] = None
+
+
+class GalleryCreate(GalleryBase):
+    pass
+
+
+class GalleryRead(GalleryBase):
+    id: int
+    created_at: datetime
+    is_active: bool
 
     class Config:
         from_attributes = True

@@ -24,17 +24,17 @@ export default async function Home() {
     {
       title: "리뷰 & 갤러리",
       desc: "리뷰 작성, 사진 모아보기",
-      href: "#reviews",
+      href: "/reviews",
     },
     {
       title: "용품 쇼핑",
       desc: "상품 구매, 결제(카드/venmo/현금 옵션)",
-      href: "#shop",
+      href: "/shop",
     },
     {
       title: "관리자",
       desc: "예약/주문/리뷰 관리 및 일정 확인",
-      href: "#admin",
+      href: "/admin",
     },
   ];
 

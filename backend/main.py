@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-from .routers import auth, reservations, products
+from .routers import auth, reservations, products, reviews, gallery, orders, admin
 
 app = FastAPI(
     title="Reservation & Shop API",
@@ -39,6 +39,10 @@ async def root():
 app.include_router(auth.router)
 app.include_router(reservations.router)
 app.include_router(products.router)
+app.include_router(reviews.router)
+app.include_router(gallery.router)
+app.include_router(orders.router)
+app.include_router(admin.router)
 
 
 

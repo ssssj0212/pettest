@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Numeric
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Numeric, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -19,6 +19,7 @@ class User(Base):
 
     reservations = relationship("Reservation", back_populates="user")
     orders = relationship("Order", back_populates="user")
+    reviews = relationship("Review", back_populates="user")
 
 
 class Reservation(Base):
@@ -32,6 +33,7 @@ class Reservation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="reservations")
+    review = relationship("Review", back_populates="reservation", uselist=False)
 
 
 class Product(Base):
@@ -54,6 +56,9 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     total_amount = Column(Numeric(10, 2), nullable=False)
     status = Column(String(20), default="PENDING")  # PENDING / PAID / CANCELED
+    payment_method = Column(String(20), nullable=True)  # CARD / VENMO / CASH
+    payment_status = Column(String(20), default="PENDING")  # PENDING / COMPLETED / FAILED
+    payment_intent_id = Column(String(255), nullable=True)  # Stripe payment intent ID
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="orders")
@@ -71,6 +76,31 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product", back_populates="order_items")
+
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    reservation_id = Column(Integer, ForeignKey("reservations.id"), nullable=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=True)
+    rating = Column(Integer, nullable=False)  # 1-5 점수
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="reviews")
+    reservation = relationship("Reservation", back_populates="review")
+
+
+class Gallery(Base):
+    __tablename__ = "gallery"
+
+    id = Column(Integer, primary_key=True, index=True)
+    image_url = Column(String(1000), nullable=False)
+    caption = Column(String(500), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(Boolean, default=True)
 
 
 
