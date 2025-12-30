@@ -75,3 +75,6 @@ def delete_gallery_item(
     db.commit()
     return {"message": "갤러리 항목이 삭제되었습니다."}
 
+
+
+

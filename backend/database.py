@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
 # 환경변수에서 DB URL 읽기
-# 예: postgresql+psycopg://user:password@host:5432/dbname
+# PostgreSQL (Neon): postgresql+psycopg://user:password@host:5432/dbname
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+psycopg://user:password@localhost:5432/reservation_db",
@@ -26,7 +26,4 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-
 

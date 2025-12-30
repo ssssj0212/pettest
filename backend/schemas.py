@@ -143,5 +143,15 @@ class GalleryRead(GalleryBase):
         from_attributes = True
 
 
+class LoginRead(BaseModel):
+    id: int
+    user_id: int
+    login_at: datetime
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    success: bool
+    failure_reason: Optional[str] = None
 
+    class Config:
+        from_attributes = True
 

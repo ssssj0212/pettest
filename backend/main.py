@@ -43,6 +43,3 @@ app.include_router(reviews.router)
 app.include_router(gallery.router)
 app.include_router(orders.router)
 app.include_router(admin.router)
-
-
-

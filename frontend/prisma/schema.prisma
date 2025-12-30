@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @db.VarChar(255)
+  name          String    @db.VarChar(100)
+  phone         String?   @db.VarChar(20)
+  role          String    @default("USER") @db.VarChar(20)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  modifiedAt    DateTime  @default(now()) @updatedAt
+
+  reservations  Reservation[]
+  orders        Order[]
+  reviews       Review[]
+  loginLogs     Login[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Reservation {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  reservedAt DateTime
+  status     String    @default("BOOKED") @db.VarChar(20)
+  memo       String?   @db.VarChar(500)
+  createdAt  DateTime  @default(now())
+  modifiedAt DateTime  @default(now()) @updatedAt
+
+  user       User      @relation(fields: [userId], references: [id])
+  review     Review?
+
+  @@map("reservations")
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  description String?     @db.VarChar(1000)
+  price       Decimal     @db.Decimal(10, 2)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  modifiedAt  DateTime    @default(now()) @updatedAt
+
+  orderItems  OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  userId         Int
+  totalAmount    Decimal     @db.Decimal(10, 2)
+  status         String      @default("PENDING") @db.VarChar(20)
+  paymentMethod  String?     @db.VarChar(20)
+  paymentStatus  String      @default("PENDING") @db.VarChar(20)
+  paymentIntentId String?    @db.VarChar(255)
+  createdAt      DateTime    @default(now())
+  modifiedAt     DateTime    @default(now()) @updatedAt
+
+  user           User        @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int       @id @default(autoincrement())
+  orderId    Int
+  productId  Int
+  quantity   Int
+  unitPrice  Decimal   @db.Decimal(10, 2)
+  createdAt  DateTime  @default(now())
+
+  order      Order     @relation(fields: [orderId], references: [id])
+  product    Product   @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Review {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  reservationId Int?
+  orderId       Int?
+  rating        Int
+  comment       String?   @db.Text
+  createdAt     DateTime  @default(now())
+  modifiedAt    DateTime  @default(now()) @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id])
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+
+  @@map("reviews")
+}
+
+model Gallery {
+  id         Int       @id @default(autoincrement())
+  imageUrl  String    @db.VarChar(1000)
+  caption   String?   @db.VarChar(500)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  modifiedAt DateTime @default(now()) @updatedAt
+
+  @@map("gallery")
+}
+
+model Login {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  loginAt       DateTime  @default(now())
+  ipAddress     String?   @db.VarChar(45)
+  userAgent     String?   @db.VarChar(500)
+  success       Boolean   @default(true)
+  failureReason String?   @db.VarChar(255)
+
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@map("login")
+}

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -42,11 +42,31 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
+    request: Request = None,
     db: Session = Depends(get_db),
 ):
     """로그인 (JWT 토큰 발급)"""
     user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    
+    # IP 주소와 User-Agent 가져오기
+    ip_address = None
+    user_agent = None
+    if request:
+        ip_address = request.client.host if request.client else None
+        user_agent = request.headers.get("user-agent", None)
+    
+    # 로그인 시도 기록 (실패 시)
     if not user or not verify_password(form_data.password, user.password_hash):
+        login_log = models.Login(
+            user_id=user.id if user else None,
+            success=False,
+            failure_reason="이메일 또는 비밀번호가 올바르지 않습니다.",
+            ip_address=ip_address,
+            user_agent=user_agent,
+        )
+        db.add(login_log)
+        db.commit()
+        
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="이메일 또는 비밀번호가 올바르지 않습니다.",
@@ -54,10 +74,30 @@ def login(
         )
 
     if not user.is_active:
+        login_log = models.Login(
+            user_id=user.id,
+            success=False,
+            failure_reason="비활성화된 사용자입니다.",
+            ip_address=ip_address,
+            user_agent=user_agent,
+        )
+        db.add(login_log)
+        db.commit()
+        
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="비활성화된 사용자입니다.",
         )
+
+    # 로그인 성공 기록
+    login_log = models.Login(
+        user_id=user.id,
+        success=True,
+        ip_address=ip_address,
+        user_agent=user_agent,
+    )
+    db.add(login_log)
+    db.commit()
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(

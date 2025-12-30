@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Numeric, Text
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy.sql import func
 
 from .database import Base
 
@@ -15,11 +15,13 @@ class User(Base):
     phone = Column(String(20), nullable=True)
     role = Column(String(20), default="USER")  # USER / ADMIN
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    modified_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     reservations = relationship("Reservation", back_populates="user")
     orders = relationship("Order", back_populates="user")
     reviews = relationship("Review", back_populates="user")
+    login_logs = relationship("Login", back_populates="user")
 
 
 class Reservation(Base):
@@ -28,9 +30,10 @@ class Reservation(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     reserved_at = Column(DateTime, nullable=False)  # 예약 시간
-    status = Column(String(20), default="BOOKED")  # BOOKED / CANCELED / DONE 등
+    status = Column(String(20), default="BOOKED")  # BOOKED / CANCELED / DONE
     memo = Column(String(500), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    modified_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     user = relationship("User", back_populates="reservations")
     review = relationship("Review", back_populates="reservation", uselist=False)
@@ -44,7 +47,8 @@ class Product(Base):
     description = Column(String(1000), nullable=True)
     price = Column(Numeric(10, 2), nullable=False)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    modified_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     order_items = relationship("OrderItem", back_populates="product")
 
@@ -59,7 +63,8 @@ class Order(Base):
     payment_method = Column(String(20), nullable=True)  # CARD / VENMO / CASH
     payment_status = Column(String(20), default="PENDING")  # PENDING / COMPLETED / FAILED
     payment_intent_id = Column(String(255), nullable=True)  # Stripe payment intent ID
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    modified_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order")
@@ -73,6 +78,7 @@ class OrderItem(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Numeric(10, 2), nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product", back_populates="order_items")
@@ -87,7 +93,8 @@ class Review(Base):
     order_id = Column(Integer, ForeignKey("orders.id"), nullable=True)
     rating = Column(Integer, nullable=False)  # 1-5 점수
     comment = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    modified_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     user = relationship("User", back_populates="reviews")
     reservation = relationship("Reservation", back_populates="review")
@@ -99,9 +106,21 @@ class Gallery(Base):
     id = Column(Integer, primary_key=True, index=True)
     image_url = Column(String(1000), nullable=False)
     caption = Column(String(500), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
     is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    modified_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
+class Login(Base):
+    __tablename__ = "login"
 
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    login_at = Column(DateTime, server_default=func.now(), nullable=False)
+    ip_address = Column(String(45), nullable=True)  # IPv6 지원
+    user_agent = Column(String(500), nullable=True)
+    success = Column(Boolean, default=True)  # 로그인 성공 여부
+    failure_reason = Column(String(255), nullable=True)  # 실패 시 이유
+
+    user = relationship("User", back_populates="login_logs")
 
