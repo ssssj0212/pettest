@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -93,7 +92,7 @@ model OrderItem {
 model Review {
   id            Int       @id @default(autoincrement())
   userId        Int
-  reservationId Int?
+  reservationId Int?      @unique
   orderId       Int?
   rating        Int
   comment       String?   @db.Text

@@ -10,12 +10,16 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "seed": "node seed.js"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@types/react-calendar": "^3.9.0",
+    "bcryptjs": "^3.0.3",
     "next": "16.1.1",
+    "pg": "^8.16.3",
     "prisma": "^7.2.0",
     "react": "19.2.3",
     "react-calendar": "^6.0.0",
