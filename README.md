@@ -62,22 +62,38 @@ python -m backend.init_db
 
 ### 3. 서버 실행
 
-#### 백엔드
+#### 🚀 자동 실행 (추천)
+프론트엔드만 실행하면 백엔드도 자동으로 함께 실행됩니다:
+
+```bash
+cd frontend
+npm run dev
+```
+
+이제 두 서버가 자동으로 시작됩니다:
+- 프론트엔드: http://localhost:3000
+- 백엔드 API: http://localhost:8000
+
+#### 수동 실행
+각각 따로 실행하려면:
+
+**백엔드:**
 ```bash
 .\venv\Scripts\activate
 uvicorn backend.main:app --reload --port 8000
 ```
 
-#### 프론트엔드
+**프론트엔드:**
 ```bash
 cd frontend
-npm run dev
+npm run dev:frontend
 ```
 
 ### 4. 접속
 
 - 프론트엔드: http://localhost:3000
 - 백엔드 API 문서: http://localhost:8000/docs
+- 백엔드 Health Check: http://localhost:8000/health
 
 ## 테스트
 
@@ -156,13 +172,36 @@ pytest backend/test_api.py -v
 
 ## 배포
 
-### 백엔드 배포 (예: Railway, Render, Fly.io)
-1. 환경변수 설정
-2. `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+### 🚀 GitHub 배포 가이드
 
-### 프론트엔드 배포 (예: Vercel, Netlify)
-1. 환경변수 설정 (`NEXT_PUBLIC_API_BASE`)
-2. `npm run build`
+자세한 배포 가이드는 [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)를 참고하세요.
+
+#### 빠른 배포
+
+**프론트엔드 (Vercel):**
+1. https://vercel.com 에서 GitHub 저장소 연결
+2. Root Directory: `frontend` 설정
+3. 환경 변수: `NEXT_PUBLIC_API_BASE` 추가
+4. 자동 배포 완료!
+
+**백엔드 (Railway/Render):**
+1. https://railway.app 또는 https://render.com 에서 GitHub 저장소 연결
+2. Root Directory: `backend` 설정
+3. 환경 변수 설정 (DATABASE_URL, ALLOWED_ORIGINS 등)
+4. 자동 배포 완료!
+
+### 수동 배포
+
+**백엔드:**
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+```
+
+**프론트엔드:**
+```bash
+npm run build
+npm start
+```
 
 ## 라이선스
 

@@ -152,19 +152,19 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
+    <main className="min-h-screen bg-[#FFF8F0] px-4 py-8">
       <div className="mx-auto max-w-7xl">
-        <h1 className="mb-6 text-3xl font-semibold">관리자 대시보드</h1>
+        <h1 className="mb-8 text-4xl font-bold text-[#FF6B6B]">관리자 대시보드</h1>
 
-        <div className="mb-6 flex gap-2 border-b">
+        <div className="mb-6 flex gap-2 border-b border-[#F5E6D3]">
           {(["dashboard", "reservations", "orders", "users", "products"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 font-medium transition ${
+              className={`px-4 py-2 font-semibold transition ${
                 activeTab === tab
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "border-b-2 border-[#FF6B6B] text-[#FF6B6B]"
+                  : "text-[#8B7355] hover:text-[#FF6B6B]"
               }`}
             >
               {tab === "dashboard" && "대시보드"}
@@ -177,41 +177,41 @@ export default function AdminPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-[#FF6B6B] border border-red-200">
             {error}
           </div>
         )}
 
         {activeTab === "dashboard" && stats && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg bg-white p-6 shadow">
-              <div className="text-sm text-gray-600">총 예약</div>
-              <div className="text-2xl font-bold">{stats.reservations.total}</div>
-              <div className="mt-2 text-xs text-gray-500">
+            <div className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+              <div className="text-sm text-[#8B7355] mb-1">총 예약</div>
+              <div className="text-3xl font-bold text-[#FF6B6B]">{stats.reservations.total}</div>
+              <div className="mt-2 text-xs text-[#8B7355]">
                 대기 중: {stats.reservations.pending}
               </div>
             </div>
-            <div className="rounded-lg bg-white p-6 shadow">
-              <div className="text-sm text-gray-600">총 주문</div>
-              <div className="text-2xl font-bold">{stats.orders.total}</div>
-              <div className="mt-2 text-xs text-gray-500">
+            <div className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+              <div className="text-sm text-[#8B7355] mb-1">총 주문</div>
+              <div className="text-3xl font-bold text-[#FF6B6B]">{stats.orders.total}</div>
+              <div className="mt-2 text-xs text-[#8B7355]">
                 대기 중: {stats.orders.pending}
               </div>
             </div>
-            <div className="rounded-lg bg-white p-6 shadow">
-              <div className="text-sm text-gray-600">총 매출</div>
-              <div className="text-2xl font-bold">
+            <div className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+              <div className="text-sm text-[#8B7355] mb-1">총 매출</div>
+              <div className="text-3xl font-bold text-[#FF6B6B]">
                 ${stats.orders.total_revenue.toFixed(2)}
               </div>
             </div>
-            <div className="rounded-lg bg-white p-6 shadow">
-              <div className="text-sm text-gray-600">총 사용자</div>
-              <div className="text-2xl font-bold">{stats.users.total}</div>
+            <div className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+              <div className="text-sm text-[#8B7355] mb-1">총 사용자</div>
+              <div className="text-3xl font-bold text-[#FF6B6B]">{stats.users.total}</div>
             </div>
-            <div className="rounded-lg bg-white p-6 shadow">
-              <div className="text-sm text-gray-600">총 리뷰</div>
-              <div className="text-2xl font-bold">{stats.reviews.total}</div>
-              <div className="mt-2 text-xs text-gray-500">
+            <div className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+              <div className="text-sm text-[#8B7355] mb-1">총 리뷰</div>
+              <div className="text-3xl font-bold text-[#FF6B6B]">{stats.reviews.total}</div>
+              <div className="mt-2 text-xs text-[#8B7355]">
                 평균 평점: {stats.reviews.average_rating.toFixed(1)}/5
               </div>
             </div>
@@ -219,23 +219,23 @@ export default function AdminPage() {
         )}
 
         {activeTab === "reservations" && (
-          <div className="rounded-lg bg-white shadow">
+          <div className="rounded-2xl bg-white shadow-warm border border-[#F5E6D3]">
             <div className="p-6">
-              <h2 className="text-xl font-semibold">예약 목록</h2>
+              <h2 className="text-xl font-bold text-[#4A4A4A]">예약 목록</h2>
               <div className="mt-4 space-y-3">
                 {reservations.map((reservation) => (
                   <div
                     key={reservation.id}
-                    className="rounded border p-4"
+                    className="rounded-xl border border-[#F5E6D3] bg-[#FFF8F0] p-4"
                   >
-                    <div className="font-medium">
+                    <div className="font-semibold text-[#4A4A4A]">
                       {new Date(reservation.reserved_at).toLocaleString("ko-KR")}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-[#8B7355] mt-1">
                       상태: {reservation.status}
                     </div>
                     {reservation.memo && (
-                      <div className="mt-1 text-sm text-gray-500">
+                      <div className="mt-2 text-sm text-[#8B7355]">
                         {reservation.memo}
                       </div>
                     )}
@@ -247,19 +247,19 @@ export default function AdminPage() {
         )}
 
         {activeTab === "orders" && (
-          <div className="rounded-lg bg-white shadow">
+          <div className="rounded-2xl bg-white shadow-warm border border-[#F5E6D3]">
             <div className="p-6">
-              <h2 className="text-xl font-semibold">주문 목록</h2>
+              <h2 className="text-xl font-bold text-[#4A4A4A]">주문 목록</h2>
               <div className="mt-4 space-y-3">
                 {orders.map((order) => (
-                  <div key={order.id} className="rounded border p-4">
-                    <div className="font-medium">
-                      주문 #{order.id} - ${parseFloat(order.total_amount).toFixed(2)}
+                  <div key={order.id} className="rounded-xl border border-[#F5E6D3] bg-[#FFF8F0] p-4">
+                    <div className="font-semibold text-[#4A4A4A]">
+                      주문 #{order.id} - <span className="text-[#FF6B6B]">${parseFloat(order.total_amount).toFixed(2)}</span>
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-[#8B7355] mt-1">
                       상태: {order.status} | 결제: {order.payment_method || "N/A"} ({order.payment_status})
                     </div>
-                    <div className="mt-2 text-xs text-gray-500">
+                    <div className="mt-2 text-xs text-[#8B7355]">
                       {new Date(order.created_at).toLocaleString("ko-KR")}
                     </div>
                   </div>
@@ -270,15 +270,15 @@ export default function AdminPage() {
         )}
 
         {activeTab === "users" && (
-          <div className="rounded-lg bg-white shadow">
+          <div className="rounded-2xl bg-white shadow-warm border border-[#F5E6D3]">
             <div className="p-6">
-              <h2 className="text-xl font-semibold">사용자 목록</h2>
+              <h2 className="text-xl font-bold text-[#4A4A4A]">사용자 목록</h2>
               <div className="mt-4 space-y-3">
                 {users.map((user) => (
-                  <div key={user.id} className="rounded border p-4">
-                    <div className="font-medium">{user.name}</div>
-                    <div className="text-sm text-gray-600">{user.email}</div>
-                    <div className="text-xs text-gray-500">
+                  <div key={user.id} className="rounded-xl border border-[#F5E6D3] bg-[#FFF8F0] p-4">
+                    <div className="font-semibold text-[#4A4A4A]">{user.name}</div>
+                    <div className="text-sm text-[#8B7355] mt-1">{user.email}</div>
+                    <div className="text-xs text-[#8B7355] mt-1">
                       역할: {user.role} | 활성: {user.is_active ? "예" : "아니오"}
                     </div>
                   </div>
@@ -291,27 +291,27 @@ export default function AdminPage() {
         {activeTab === "products" && (
           <div className="space-y-4">
             <div className="flex justify-between">
-              <h2 className="text-xl font-semibold">상품 관리</h2>
+              <h2 className="text-xl font-bold text-[#4A4A4A]">상품 관리</h2>
               <button
                 onClick={() => {
                   setEditingProduct(null);
                   setProductForm({ name: "", description: "", price: "" });
                   setShowProductForm(true);
                 }}
-                className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+                className="rounded-lg bg-[#FF6B6B] px-5 py-2.5 font-semibold text-white transition hover:bg-[#FF5252] shadow-warm"
               >
                 상품 추가
               </button>
             </div>
 
             {showProductForm && (
-              <div className="rounded-lg bg-white p-6 shadow">
-                <h3 className="mb-4 text-lg font-semibold">
+              <div className="rounded-2xl bg-white p-6 shadow-warm-lg border border-[#F5E6D3]">
+                <h3 className="mb-4 text-lg font-bold text-[#4A4A4A]">
                   {editingProduct ? "상품 수정" : "상품 추가"}
                 </h3>
-                <form onSubmit={handleProductSubmit} className="space-y-4">
+                <form onSubmit={handleProductSubmit} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-[#4A4A4A] mb-2">
                       상품명
                     </label>
                     <input
@@ -321,11 +321,11 @@ export default function AdminPage() {
                         setProductForm({ ...productForm, name: e.target.value })
                       }
                       required
-                      className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      className="mt-1 w-full rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-[#4A4A4A] mb-2">
                       설명
                     </label>
                     <textarea
@@ -334,11 +334,11 @@ export default function AdminPage() {
                         setProductForm({ ...productForm, description: e.target.value })
                       }
                       rows={3}
-                      className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      className="mt-1 w-full rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-[#4A4A4A] mb-2">
                       가격
                     </label>
                     <input
@@ -349,14 +349,14 @@ export default function AdminPage() {
                         setProductForm({ ...productForm, price: e.target.value })
                       }
                       required
-                      className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
+                      className="mt-1 w-full rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <button
                       type="submit"
                       disabled={loading}
-                      className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:bg-gray-400"
+                      className="rounded-lg bg-[#FF6B6B] px-4 py-2.5 font-semibold text-white transition hover:bg-[#FF5252] disabled:bg-[#FFB88C] disabled:cursor-not-allowed shadow-warm"
                     >
                       {loading ? "저장 중..." : "저장"}
                     </button>
@@ -366,7 +366,7 @@ export default function AdminPage() {
                         setShowProductForm(false);
                         setEditingProduct(null);
                       }}
-                      className="rounded-md bg-gray-200 px-4 py-2 font-medium text-gray-700 transition hover:bg-gray-300"
+                      className="rounded-lg bg-[#FFF8F0] px-4 py-2.5 font-semibold text-[#8B7355] transition hover:bg-[#FFB88C] hover:text-white border border-[#F5E6D3]"
                     >
                       취소
                     </button>
@@ -377,13 +377,13 @@ export default function AdminPage() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((product) => (
-                <div key={product.id} className="rounded-lg bg-white p-6 shadow">
-                  <h3 className="font-semibold">{product.name}</h3>
+                <div key={product.id} className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+                  <h3 className="font-bold text-[#4A4A4A]">{product.name}</h3>
                   {product.description && (
-                    <p className="mt-2 text-sm text-gray-600">{product.description}</p>
+                    <p className="mt-2 text-sm text-[#8B7355] leading-relaxed">{product.description}</p>
                   )}
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-lg font-bold text-blue-600">
+                    <span className="text-xl font-bold text-[#FF6B6B]">
                       ${parseFloat(product.price).toFixed(2)}
                     </span>
                     <div className="flex gap-2">
@@ -397,13 +397,13 @@ export default function AdminPage() {
                           });
                           setShowProductForm(true);
                         }}
-                        className="rounded bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 transition hover:bg-blue-200"
+                        className="rounded-lg bg-[#FFB88C] px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-[#FF8E53]"
                       >
                         수정
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="rounded bg-red-100 px-3 py-1 text-sm font-medium text-red-700 transition hover:bg-red-200"
+                        className="rounded-lg bg-red-50 px-3 py-1.5 text-sm font-semibold text-[#FF6B6B] transition hover:bg-[#FF6B6B] hover:text-white border border-[#FF6B6B]"
                       >
                         삭제
                       </button>
@@ -418,6 +418,7 @@ export default function AdminPage() {
     </main>
   );
 }
+
 
 
 

@@ -35,21 +35,21 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
-        <h1 className="mb-6 text-2xl font-semibold">회원가입</h1>
+    <main className="flex min-h-screen items-center justify-center bg-[#FFF8F0] px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-warm-lg border border-[#F5E6D3]">
+        <h1 className="mb-8 text-3xl font-bold text-[#FF6B6B]">회원가입</h1>
 
         {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-[#FF6B6B] border border-red-200">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#4A4A4A] mb-2"
             >
               이메일
             </label>
@@ -61,14 +61,15 @@ export default function RegisterPage() {
                 setFormData({ ...formData, email: e.target.value })
               }
               required
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-[#F5E6D3] px-4 py-3 bg-[#FFF8F0] text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
+              placeholder="이메일을 입력하세요"
             />
           </div>
 
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#4A4A4A] mb-2"
             >
               이름
             </label>
@@ -80,14 +81,15 @@ export default function RegisterPage() {
                 setFormData({ ...formData, name: e.target.value })
               }
               required
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-[#F5E6D3] px-4 py-3 bg-[#FFF8F0] text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
+              placeholder="이름을 입력하세요"
             />
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#4A4A4A] mb-2"
             >
               비밀번호
             </label>
@@ -100,14 +102,15 @@ export default function RegisterPage() {
               }
               required
               minLength={6}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-[#F5E6D3] px-4 py-3 bg-[#FFF8F0] text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
+              placeholder="비밀번호를 입력하세요 (최소 6자)"
             />
           </div>
 
           <div>
             <label
               htmlFor="phone"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-[#4A4A4A] mb-2"
             >
               전화번호 (선택)
             </label>
@@ -118,22 +121,23 @@ export default function RegisterPage() {
               onChange={(e) =>
                 setFormData({ ...formData, phone: e.target.value })
               }
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-[#F5E6D3] px-4 py-3 bg-[#FFF8F0] text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
+              placeholder="전화번호를 입력하세요"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:bg-gray-400"
+            className="w-full rounded-lg bg-[#FF6B6B] px-4 py-3 font-semibold text-white transition hover:bg-[#FF5252] disabled:bg-[#FFB88C] disabled:cursor-not-allowed shadow-warm mt-6"
           >
             {loading ? "가입 중..." : "회원가입"}
           </button>
         </form>
 
-        <div className="mt-4 text-center text-sm text-gray-600">
+        <div className="mt-6 text-center text-sm text-[#8B7355]">
           이미 계정이 있으신가요?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline">
+          <Link href="/login" className="text-[#FF6B6B] font-medium hover:text-[#FF5252] hover:underline transition-colors">
             로그인
           </Link>
         </div>
@@ -141,6 +145,7 @@ export default function RegisterPage() {
     </main>
   );
 }
+
 
 
 

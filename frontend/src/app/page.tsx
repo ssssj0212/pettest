@@ -39,37 +39,39 @@ export default async function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="mx-auto max-w-5xl px-6 py-10">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <main className="min-h-screen bg-[#FFF8F0] text-[#4A4A4A]">
+      <div className="mx-auto max-w-5xl px-6 py-12">
+        <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between mb-12">
           <div>
-            <h1 className="text-3xl font-semibold">Rover 스타일 반려견 서비스</h1>
-            <p className="text-gray-600">
-              예약·리뷰·갤러리·쇼핑을 하나로, 반응형 웹 & PWA 준비
+            <h1 className="text-4xl font-bold text-[#FF6B6B] mb-2">반려견 서비스</h1>
+            <p className="text-[#8B7355] text-lg">
+              예약·리뷰·갤러리·쇼핑을 하나로, 따뜻한 서비스와 함께
             </p>
           </div>
-          <div className="rounded-lg bg-white px-4 py-3 shadow">
-            <div className="text-xs uppercase text-gray-500">백엔드 상태</div>
-            <div className="text-sm font-medium">
-              {health ? `연결됨 (${health})` : "연결 안 됨"}
+          <div className="rounded-xl bg-white px-5 py-4 shadow-warm border border-[#F5E6D3]">
+            <div className="text-xs uppercase text-[#8B7355] mb-1">백엔드 상태</div>
+            <div className="text-sm font-semibold text-[#4A4A4A]">
+              {health ? `✅ 연결됨 (${health})` : "❌ 연결 안 됨"}
             </div>
-            <div className="text-xs text-gray-500">
-              env: NEXT_PUBLIC_API_BASE (기본 http://localhost:8000)
+            <div className="text-xs text-[#8B7355] mt-1">
+              env: NEXT_PUBLIC_API_BASE
             </div>
           </div>
         </header>
 
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (
             <Link
               key={card.title}
               href={card.href}
-              className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              className="group rounded-2xl border border-[#F5E6D3] bg-white p-6 shadow-warm transition-all duration-300 hover:-translate-y-2 hover:shadow-warm-lg hover:border-[#FFB88C]"
             >
-              <div className="text-lg font-semibold">{card.title}</div>
-              <p className="mt-2 text-sm text-gray-600">{card.desc}</p>
-              <span className="mt-3 inline-flex text-sm text-blue-600">
-                바로 가기 →
+              <div className="text-xl font-bold text-[#4A4A4A] mb-2 group-hover:text-[#FF6B6B] transition-colors">
+                {card.title}
+              </div>
+              <p className="mt-2 text-sm text-[#8B7355] leading-relaxed">{card.desc}</p>
+              <span className="mt-4 inline-flex items-center text-sm font-medium text-[#FF6B6B] group-hover:text-[#FF5252] transition-colors">
+                바로 가기 <span className="ml-1">→</span>
               </span>
             </Link>
           ))}

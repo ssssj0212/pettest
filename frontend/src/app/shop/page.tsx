@@ -126,17 +126,17 @@ export default function ShopPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
+    <main className="min-h-screen bg-[#FFF8F0] px-4 py-8">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-semibold">용품 쇼핑</h1>
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-4xl font-bold text-[#FF6B6B]">용품 쇼핑</h1>
           <button
             onClick={() => setShowCart(!showCart)}
-            className="relative rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+            className="relative rounded-lg bg-[#FF6B6B] px-5 py-2.5 font-semibold text-white transition hover:bg-[#FF5252] shadow-warm"
           >
             장바구니
             {cart.length > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+              <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#FF8E53] text-xs font-bold text-white shadow">
                 {cart.reduce((sum, item) => sum + item.quantity, 0)}
               </span>
             )}
@@ -144,37 +144,37 @@ export default function ShopPage() {
         </div>
 
         {error && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-[#FF6B6B] border border-red-200">
             {error}
           </div>
         )}
 
         {showCart && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-warm-lg border border-[#F5E6D3]">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">장바구니</h2>
+                <h2 className="text-2xl font-bold text-[#FF6B6B]">장바구니</h2>
                 <button
                   onClick={() => setShowCart(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-[#8B7355] hover:text-[#FF6B6B] transition-colors text-2xl"
                 >
                   ✕
                 </button>
               </div>
 
               {cart.length === 0 ? (
-                <p className="text-gray-500">장바구니가 비어있습니다.</p>
+                <p className="text-[#8B7355] text-center py-8">장바구니가 비어있습니다.</p>
               ) : (
                 <>
                   <div className="max-h-96 space-y-3 overflow-y-auto">
                     {cart.map((item) => (
                       <div
                         key={item.product.id}
-                        className="flex items-center justify-between rounded border p-3"
+                        className="flex items-center justify-between rounded-xl border border-[#F5E6D3] p-4 bg-[#FFF8F0]"
                       >
                         <div className="flex-1">
-                          <div className="font-medium">{item.product.name}</div>
-                          <div className="text-sm text-gray-600">
+                          <div className="font-semibold text-[#4A4A4A]">{item.product.name}</div>
+                          <div className="text-sm text-[#8B7355] mt-1">
                             ${parseFloat(item.product.price).toFixed(2)} ×{" "}
                             {item.quantity}
                           </div>
@@ -184,22 +184,22 @@ export default function ShopPage() {
                             onClick={() =>
                               updateQuantity(item.product.id, item.quantity - 1)
                             }
-                            className="rounded bg-gray-200 px-2 py-1 text-sm"
+                            className="rounded-lg bg-white border border-[#F5E6D3] px-3 py-1 text-sm text-[#4A4A4A] hover:bg-[#FFB88C] hover:text-white transition-colors"
                           >
                             -
                           </button>
-                          <span>{item.quantity}</span>
+                          <span className="font-medium text-[#4A4A4A] min-w-[24px] text-center">{item.quantity}</span>
                           <button
                             onClick={() =>
                               updateQuantity(item.product.id, item.quantity + 1)
                             }
-                            className="rounded bg-gray-200 px-2 py-1 text-sm"
+                            className="rounded-lg bg-white border border-[#F5E6D3] px-3 py-1 text-sm text-[#4A4A4A] hover:bg-[#FFB88C] hover:text-white transition-colors"
                           >
                             +
                           </button>
                           <button
                             onClick={() => removeFromCart(item.product.id)}
-                            className="ml-2 text-red-600"
+                            className="ml-2 text-[#FF6B6B] hover:text-[#FF5252] transition-colors text-sm font-medium"
                           >
                             삭제
                           </button>
@@ -207,17 +207,17 @@ export default function ShopPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 border-t pt-4">
-                    <div className="mb-4 flex justify-between text-lg font-semibold">
+                  <div className="mt-4 border-t border-[#F5E6D3] pt-4">
+                    <div className="mb-4 flex justify-between text-xl font-bold text-[#4A4A4A]">
                       <span>총액</span>
-                      <span>${getTotal().toFixed(2)}</span>
+                      <span className="text-[#FF6B6B]">${getTotal().toFixed(2)}</span>
                     </div>
                     <button
                       onClick={() => {
                         setShowCart(false);
                         setShowCheckout(true);
                       }}
-                      className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+                      className="w-full rounded-lg bg-[#FF6B6B] px-4 py-3 font-semibold text-white transition hover:bg-[#FF5252] shadow-warm"
                     >
                       결제하기
                     </button>
@@ -229,12 +229,12 @@ export default function ShopPage() {
         )}
 
         {showCheckout && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-              <h2 className="mb-4 text-xl font-semibold">결제 방법 선택</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-warm-lg border border-[#F5E6D3]">
+              <h2 className="mb-6 text-2xl font-bold text-[#FF6B6B]">결제 방법 선택</h2>
 
-              <div className="mb-4 space-y-2">
-                <label className="flex items-center gap-2">
+              <div className="mb-6 space-y-3">
+                <label className="flex items-center gap-3 p-3 rounded-lg border border-[#F5E6D3] hover:bg-[#FFF8F0] cursor-pointer transition-colors">
                   <input
                     type="radio"
                     value="CARD"
@@ -242,10 +242,11 @@ export default function ShopPage() {
                     onChange={(e) =>
                       setPaymentMethod(e.target.value as "CARD" | "VENMO" | "CASH")
                     }
+                    className="text-[#FF6B6B] focus:ring-[#FFB88C]"
                   />
-                  <span>카드 결제 (Stripe)</span>
+                  <span className="text-[#4A4A4A] font-medium">카드 결제 (Stripe)</span>
                 </label>
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-3 p-3 rounded-lg border border-[#F5E6D3] hover:bg-[#FFF8F0] cursor-pointer transition-colors">
                   <input
                     type="radio"
                     value="VENMO"
@@ -253,10 +254,11 @@ export default function ShopPage() {
                     onChange={(e) =>
                       setPaymentMethod(e.target.value as "CARD" | "VENMO" | "CASH")
                     }
+                    className="text-[#FF6B6B] focus:ring-[#FFB88C]"
                   />
-                  <span>Venmo</span>
+                  <span className="text-[#4A4A4A] font-medium">Venmo</span>
                 </label>
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-3 p-3 rounded-lg border border-[#F5E6D3] hover:bg-[#FFF8F0] cursor-pointer transition-colors">
                   <input
                     type="radio"
                     value="CASH"
@@ -264,27 +266,28 @@ export default function ShopPage() {
                     onChange={(e) =>
                       setPaymentMethod(e.target.value as "CARD" | "VENMO" | "CASH")
                     }
+                    className="text-[#FF6B6B] focus:ring-[#FFB88C]"
                   />
-                  <span>현금 (현장 결제)</span>
+                  <span className="text-[#4A4A4A] font-medium">현금 (현장 결제)</span>
                 </label>
               </div>
 
-              <div className="mb-4 flex justify-between text-lg font-semibold">
+              <div className="mb-6 flex justify-between text-xl font-bold text-[#4A4A4A] border-t border-[#F5E6D3] pt-4">
                 <span>총액</span>
-                <span>${getTotal().toFixed(2)}</span>
+                <span className="text-[#FF6B6B]">${getTotal().toFixed(2)}</span>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setShowCheckout(false)}
-                  className="flex-1 rounded-md bg-gray-200 px-4 py-2 font-medium text-gray-700 transition hover:bg-gray-300"
+                  className="flex-1 rounded-lg bg-[#FFF8F0] px-4 py-3 font-semibold text-[#8B7355] transition hover:bg-[#FFB88C] hover:text-white"
                 >
                   취소
                 </button>
                 <button
                   onClick={handleCheckout}
                   disabled={loading}
-                  className="flex-1 rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:bg-gray-400"
+                  className="flex-1 rounded-lg bg-[#FF6B6B] px-4 py-3 font-semibold text-white transition hover:bg-[#FF5252] disabled:bg-[#FFB88C] disabled:cursor-not-allowed shadow-warm"
                 >
                   {loading ? "처리 중..." : "결제하기"}
                 </button>
@@ -295,27 +298,27 @@ export default function ShopPage() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.length === 0 ? (
-            <div className="col-span-full rounded-lg bg-white p-8 text-center text-gray-500 shadow">
+            <div className="col-span-full rounded-2xl bg-white p-12 text-center text-[#8B7355] shadow-warm border border-[#F5E6D3]">
               등록된 상품이 없습니다.
             </div>
           ) : (
             products.map((product) => (
               <div
                 key={product.id}
-                className="rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
+                className="rounded-2xl bg-white p-6 shadow-warm transition-all duration-300 hover:shadow-warm-lg hover:-translate-y-1 border border-[#F5E6D3]"
               >
-                <h3 className="mb-2 text-lg font-semibold">{product.name}</h3>
+                <h3 className="mb-2 text-xl font-bold text-[#4A4A4A]">{product.name}</h3>
                 {product.description && (
-                  <p className="mb-3 text-sm text-gray-600">{product.description}</p>
+                  <p className="mb-4 text-sm text-[#8B7355] leading-relaxed">{product.description}</p>
                 )}
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="text-xl font-bold text-blue-600">
+                  <span className="text-2xl font-bold text-[#FF6B6B]">
                     ${parseFloat(product.price).toFixed(2)}
                   </span>
                 </div>
                 <button
                   onClick={() => addToCart(product)}
-                  className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+                  className="w-full rounded-lg bg-[#FF6B6B] px-4 py-3 font-semibold text-white transition hover:bg-[#FF5252] shadow-warm"
                 >
                   장바구니에 추가
                 </button>
@@ -327,6 +330,7 @@ export default function ShopPage() {
     </main>
   );
 }
+
 
 
 

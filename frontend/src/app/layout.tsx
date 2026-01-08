@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: "Rover 스타일 반려견 서비스",
   description: "예약·리뷰·갤러리·쇼핑을 하나로",
   manifest: "/manifest.json",
-  themeColor: "#3b82f6",
+  themeColor: "#FF6B6B",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   appleWebApp: {
     capable: true,

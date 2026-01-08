@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev-with-backend.js",
+    "dev:frontend": "next dev",
+    "dev:backend": "cd .. && venv\\Scripts\\python.exe -m uvicorn backend.main:app --reload --port 8000 --host 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

@@ -140,21 +140,21 @@ export default function ReservationsPage() {
 
   if (pageLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-50">
+      <main className="flex min-h-screen items-center justify-center bg-[#FFF8F0]">
         <LoadingSpinner size="lg" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
+    <main className="min-h-screen bg-[#FFF8F0] px-4 py-8">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-6 text-3xl font-semibold">예약하기</h1>
+        <h1 className="mb-8 text-4xl font-bold text-[#FF6B6B]">예약하기</h1>
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* 달력 */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h2 className="mb-4 text-xl font-semibold">날짜 선택</h2>
+          <div className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+            <h2 className="mb-4 text-xl font-bold text-[#4A4A4A]">날짜 선택</h2>
             <Calendar
               onChange={handleDateChange}
               value={selectedDate}
@@ -173,32 +173,36 @@ export default function ReservationsPage() {
                 font-family: inherit;
               }
               .react-calendar__tile.has-reservation {
-                background-color: #dbeafe;
+                background-color: #FFB88C;
                 font-weight: 600;
+                color: #4A4A4A;
               }
               .react-calendar__tile--active {
-                background-color: #3b82f6 !important;
+                background-color: #FF6B6B !important;
                 color: white;
+              }
+              .react-calendar__tile:hover {
+                background-color: #FFB88C;
               }
             `}</style>
           </div>
 
           {/* 예약 폼 */}
-          <div className="rounded-lg bg-white p-6 shadow">
-            <h2 className="mb-4 text-xl font-semibold">예약 정보</h2>
+          <div className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+            <h2 className="mb-4 text-xl font-bold text-[#4A4A4A]">예약 정보</h2>
 
             {error && (
-              <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-[#FF6B6B] border border-red-200">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-[#4A4A4A] mb-2">
                   선택한 날짜
                 </label>
-                <div className="mt-1 rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+                <div className="mt-1 rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-sm text-[#4A4A4A] font-medium">
                   {selectedDate && !Array.isArray(selectedDate)
                     ? selectedDate.toLocaleDateString("ko-KR", {
                         year: "numeric",
@@ -212,7 +216,7 @@ export default function ReservationsPage() {
               <div>
                 <label
                   htmlFor="time"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-[#4A4A4A] mb-2"
                 >
                   시간 선택
                 </label>
@@ -221,7 +225,7 @@ export default function ReservationsPage() {
                   value={selectedTime}
                   onChange={(e) => setSelectedTime(e.target.value)}
                   required
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 w-full rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
                 >
                   <option value="">시간 선택</option>
                   {timeSlots.map((time) => {
@@ -240,7 +244,7 @@ export default function ReservationsPage() {
               <div>
                 <label
                   htmlFor="memo"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-[#4A4A4A] mb-2"
                 >
                   메모 (선택)
                 </label>
@@ -249,7 +253,7 @@ export default function ReservationsPage() {
                   value={memo}
                   onChange={(e) => setMemo(e.target.value)}
                   rows={3}
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 w-full rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
                   placeholder="특이사항이나 요청사항을 입력해주세요"
                 />
               </div>
@@ -257,7 +261,7 @@ export default function ReservationsPage() {
               <button
                 type="submit"
                 disabled={loading || !selectedDate || !selectedTime}
-                className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:bg-gray-400"
+                className="w-full rounded-lg bg-[#FF6B6B] px-4 py-3 font-semibold text-white transition hover:bg-[#FF5252] disabled:bg-[#FFB88C] disabled:cursor-not-allowed shadow-warm mt-6"
               >
                 {loading ? "예약 중..." : "예약하기"}
               </button>
@@ -266,27 +270,27 @@ export default function ReservationsPage() {
         </div>
 
         {/* 예약 목록 */}
-        <div className="mt-8 rounded-lg bg-white p-6 shadow">
-          <h2 className="mb-4 text-xl font-semibold">내 예약 목록</h2>
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]">
+          <h2 className="mb-4 text-xl font-bold text-[#4A4A4A]">내 예약 목록</h2>
           {reservations.length === 0 ? (
-            <p className="text-gray-500">예약이 없습니다.</p>
+            <p className="text-[#8B7355] text-center py-8">예약이 없습니다.</p>
           ) : (
             <div className="space-y-3">
               {reservations.map((reservation) => (
                 <div
                   key={reservation.id}
-                  className="flex items-center justify-between rounded-md border border-gray-200 p-4"
+                  className="flex items-center justify-between rounded-xl border border-[#F5E6D3] bg-[#FFF8F0] p-4"
                 >
                   <div>
-                    <div className="font-medium">
+                    <div className="font-semibold text-[#4A4A4A]">
                       {new Date(reservation.reserved_at).toLocaleString("ko-KR")}
                     </div>
                     {reservation.memo && (
-                      <div className="mt-1 text-sm text-gray-600">
+                      <div className="mt-1 text-sm text-[#8B7355]">
                         {reservation.memo}
                       </div>
                     )}
-                    <div className="mt-1 text-xs text-gray-500">
+                    <div className="mt-1 text-xs text-[#8B7355]">
                       상태: {reservation.status}
                     </div>
                   </div>
@@ -308,7 +312,7 @@ export default function ReservationsPage() {
                             }
                           }
                         }}
-                        className="rounded-md bg-red-100 px-3 py-1 text-sm font-medium text-red-700 transition hover:bg-red-200"
+                        className="rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-[#FF6B6B] transition hover:bg-[#FF6B6B] hover:text-white border border-[#FF6B6B]"
                       >
                         취소
                       </button>

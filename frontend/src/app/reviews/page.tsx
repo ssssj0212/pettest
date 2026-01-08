@@ -69,10 +69,10 @@ export default function ReviewsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
+    <main className="min-h-screen bg-[#FFF8F0] px-4 py-8">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-semibold">리뷰</h1>
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-4xl font-bold text-[#FF6B6B]">리뷰</h1>
           <button
             onClick={() => {
               if (!getToken()) {
@@ -81,25 +81,25 @@ export default function ReviewsPage() {
               }
               setShowForm(!showForm);
             }}
-            className="rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+            className="rounded-lg bg-[#FF6B6B] px-5 py-2.5 font-semibold text-white transition hover:bg-[#FF5252] shadow-warm"
           >
             {showForm ? "취소" : "리뷰 작성"}
           </button>
         </div>
 
         {showForm && (
-          <div className="mb-6 rounded-lg bg-white p-6 shadow">
-            <h2 className="mb-4 text-xl font-semibold">리뷰 작성</h2>
+          <div className="mb-6 rounded-2xl bg-white p-6 shadow-warm-lg border border-[#F5E6D3]">
+            <h2 className="mb-4 text-xl font-bold text-[#4A4A4A]">리뷰 작성</h2>
 
             {error && (
-              <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-[#FF6B6B] border border-red-200">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-[#4A4A4A] mb-2">
                   평점
                 </label>
                 <select
@@ -108,7 +108,7 @@ export default function ReviewsPage() {
                     setFormData({ ...formData, rating: parseInt(e.target.value) })
                   }
                   required
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 w-full rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
                 >
                   <option value={5}>5점 - 매우 만족</option>
                   <option value={4}>4점 - 만족</option>
@@ -121,7 +121,7 @@ export default function ReviewsPage() {
               <div>
                 <label
                   htmlFor="comment"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-[#4A4A4A] mb-2"
                 >
                   후기 내용
                 </label>
@@ -132,7 +132,7 @@ export default function ReviewsPage() {
                     setFormData({ ...formData, comment: e.target.value })
                   }
                   rows={5}
-                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="mt-1 w-full rounded-lg border border-[#F5E6D3] bg-[#FFF8F0] px-4 py-3 text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
                   placeholder="서비스에 대한 후기를 작성해주세요"
                 />
               </div>
@@ -140,7 +140,7 @@ export default function ReviewsPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:bg-gray-400"
+                className="w-full rounded-lg bg-[#FF6B6B] px-4 py-3 font-semibold text-white transition hover:bg-[#FF5252] disabled:bg-[#FFB88C] disabled:cursor-not-allowed shadow-warm mt-6"
               >
                 {loading ? "작성 중..." : "리뷰 등록"}
               </button>
@@ -150,36 +150,36 @@ export default function ReviewsPage() {
 
         <div className="space-y-4">
           {reviews.length === 0 ? (
-            <div className="rounded-lg bg-white p-8 text-center text-gray-500 shadow">
+            <div className="rounded-2xl bg-white p-12 text-center text-[#8B7355] shadow-warm border border-[#F5E6D3]">
               아직 등록된 리뷰가 없습니다.
             </div>
           ) : (
             reviews.map((review) => (
               <div
                 key={review.id}
-                className="rounded-lg bg-white p-6 shadow"
+                className="rounded-2xl bg-white p-6 shadow-warm border border-[#F5E6D3]"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="font-semibold">
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className="font-bold text-[#4A4A4A]">
                         {review.user_name || "익명"}
                       </span>
-                      <div className="flex text-yellow-400">
+                      <div className="flex text-[#FF8E53] text-lg">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <span key={i}>
                             {i < review.rating ? "★" : "☆"}
                           </span>
                         ))}
                       </div>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-[#8B7355] font-medium">
                         ({review.rating}/5)
                       </span>
                     </div>
                     {review.comment && (
-                      <p className="mb-2 text-gray-700">{review.comment}</p>
+                      <p className="mb-3 text-[#4A4A4A] leading-relaxed">{review.comment}</p>
                     )}
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-[#8B7355]">
                       {new Date(review.created_at).toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
@@ -196,6 +196,7 @@ export default function ReviewsPage() {
     </main>
   );
 }
+
 
 
 
