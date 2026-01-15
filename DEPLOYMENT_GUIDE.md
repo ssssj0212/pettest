@@ -138,3 +138,6 @@ ALLOWED_ORIGINS=https://your-app.vercel.app
 - **도메인 연결**:
   - Vercel과 Railway 모두 커스텀 도메인 지원
 
+
+
+

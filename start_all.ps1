@@ -41,3 +41,6 @@ Write-Host "⏳ 서버가 완전히 시작될 때까지 몇 초 기다려주세�
 $backendProcess.Id | Out-File -FilePath "$projectRoot\.backend.pid" -Encoding ASCII
 $frontendProcess.Id | Out-File -FilePath "$projectRoot\.frontend.pid" -Encoding ASCII
 
+
+
+
