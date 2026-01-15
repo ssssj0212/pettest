@@ -1,15 +1,28 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+
+const BACKEND_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'
 
 export async function GET() {
   try {
-    // 데이터베이스 연결 테스트
-    await prisma.$connect()
-    await prisma.$disconnect()
+    // FastAPI 백엔드로 health check 프록시
+    const res = await fetch(`${BACKEND_URL}/health`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    })
+
+    if (!res.ok) {
+      throw new Error(`Backend health check failed: ${res.status}`)
+    }
+
+    const data = await res.json()
     
     return NextResponse.json({ 
       status: 'ok',
       database: 'connected',
+      backend: data,
       timestamp: new Date().toISOString()
     })
   } catch (error) {
