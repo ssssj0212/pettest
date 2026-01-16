@@ -10,28 +10,71 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    confirmPassword: "",
     name: "",
     phone: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{
+    password?: string;
+    confirmPassword?: string;
+    general?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
+
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+
+    // 비밀번호 최소 8자 검증
+    if (formData.password.length < 8) {
+      newErrors.password = "비밀번호는 최소 8자 이상이어야 합니다.";
+    }
+
+    // 비밀번호 확인 일치 검증
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "비밀번호가 일치하지 않습니다.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrors({});
+
+    // 유효성 검증
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await register(formData);
+      // confirmPassword는 제외하고 전송
+      const { confirmPassword, ...registerData } = formData;
+      await register(registerData);
       // 회원가입 성공 후 자동 로그인
       await login({ username: formData.email, password: formData.password });
       router.push("/");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
+      setErrors({
+        general: err instanceof Error ? err.message : "회원가입에 실패했습니다.",
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  // 폼 유효성 검사 (버튼 disabled 처리용)
+  const isFormValid = () => {
+    return (
+      formData.email.length > 0 &&
+      formData.name.length > 0 &&
+      formData.password.length >= 8 &&
+      formData.password === formData.confirmPassword &&
+      formData.confirmPassword.length > 0
+    );
   };
 
   return (
@@ -39,9 +82,9 @@ export default function RegisterPage() {
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-warm-lg border border-[#F5E6D3]">
         <h1 className="mb-8 text-3xl font-bold text-[#FF6B6B]">회원가입</h1>
 
-        {error && (
+        {errors.general && (
           <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-[#FF6B6B] border border-red-200">
-            {error}
+            {errors.general}
           </div>
         )}
 
@@ -97,14 +140,87 @@ export default function RegisterPage() {
               id="password"
               type="password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, password: e.target.value });
+                // 실시간 검증
+                if (e.target.value.length > 0 && e.target.value.length < 8) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    password: "비밀번호는 최소 8자 이상이어야 합니다.",
+                  }));
+                } else {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.password;
+                    return newErrors;
+                  });
+                }
+                // 비밀번호 확인 재검증
+                if (formData.confirmPassword && e.target.value !== formData.confirmPassword) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    confirmPassword: "비밀번호가 일치하지 않습니다.",
+                  }));
+                } else if (formData.confirmPassword && e.target.value === formData.confirmPassword) {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.confirmPassword;
+                    return newErrors;
+                  });
+                }
+              }}
               required
-              minLength={6}
-              className="mt-1 w-full rounded-lg border border-[#F5E6D3] px-4 py-3 bg-[#FFF8F0] text-[#4A4A4A] focus:border-[#FF6B6B] focus:outline-none focus:ring-2 focus:ring-[#FFB88C] transition-all"
-              placeholder="비밀번호를 입력하세요 (최소 6자)"
+              minLength={8}
+              className={`mt-1 w-full rounded-lg border px-4 py-3 bg-[#FFF8F0] text-[#4A4A4A] focus:outline-none focus:ring-2 transition-all ${
+                errors.password
+                  ? "border-red-300 focus:border-red-400 focus:ring-red-200"
+                  : "border-[#F5E6D3] focus:border-[#FF6B6B] focus:ring-[#FFB88C]"
+              }`}
+              placeholder="비밀번호를 입력하세요 (최소 8자)"
             />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-[#4A4A4A] mb-2"
+            >
+              비밀번호 확인
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => {
+                setFormData({ ...formData, confirmPassword: e.target.value });
+                // 실시간 검증
+                if (e.target.value && e.target.value !== formData.password) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    confirmPassword: "비밀번호가 일치하지 않습니다.",
+                  }));
+                } else {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.confirmPassword;
+                    return newErrors;
+                  });
+                }
+              }}
+              required
+              className={`mt-1 w-full rounded-lg border px-4 py-3 bg-[#FFF8F0] text-[#4A4A4A] focus:outline-none focus:ring-2 transition-all ${
+                errors.confirmPassword
+                  ? "border-red-300 focus:border-red-400 focus:ring-red-200"
+                  : "border-[#F5E6D3] focus:border-[#FF6B6B] focus:ring-[#FFB88C]"
+              }`}
+              placeholder="비밀번호를 다시 입력하세요"
+            />
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+            )}
           </div>
 
           <div>
@@ -128,7 +244,7 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !isFormValid()}
             className="w-full rounded-lg bg-[#FF6B6B] px-4 py-3 font-semibold text-white transition hover:bg-[#FF5252] disabled:bg-[#FFB88C] disabled:cursor-not-allowed shadow-warm mt-6"
           >
             {loading ? "가입 중..." : "회원가입"}

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import PWAInstaller from "@/components/PWAInstaller";
+import SessionProvider from "@/components/SessionProvider";
 import "@/lib/sw-register";
 
 const geistSans = Geist({
@@ -38,9 +39,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
-        {children}
-        <PWAInstaller />
+        <SessionProvider>
+          <Header />
+          {children}
+          <PWAInstaller />
+        </SessionProvider>
       </body>
     </html>
   );
