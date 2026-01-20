@@ -45,3 +45,5 @@ $frontendProcess.Id | Out-File -FilePath "$projectRoot\.frontend.pid" -Encoding 
 
 
 
+
+
