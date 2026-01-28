@@ -1,5 +1,44 @@
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+// 로컬 개발: FastAPI (http://localhost:8000)
+// 프로덕션: Next.js API Routes (빈 문자열 = 상대 경로 /api)
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
+
+
+  import { getSession } from 'next-auth/react'
+
+  export async function apiFetch(path: string, init: RequestInit = {}) {
+    console.log('apiFetch CALLED:', path)
+  
+    const session = await getSession()
+    const token = (session as any)?.accessToken
+  
+    const headers = new Headers(init.headers)
+    headers.set('Content-Type', 'application/json')
+    if (token) headers.set('Authorization', `Bearer ${token}`)
+  
+    const base = process.env.NEXT_PUBLIC_API_BASE
+  
+    // ✅ 8초 타임아웃
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000)
+  
+    try {
+      const res = await fetch(`${base}${path}`, {
+        ...init,
+        headers,
+        signal: controller.signal,
+      })
+  
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        throw new Error(`API ${res.status}: ${text}`)
+      }
+  
+      return res
+    } finally {
+      clearTimeout(timeoutId)
+    }
+  }
+  
 
 // 토큰 관리 (클라이언트 사이드)
 export function getToken(): string | null {
@@ -393,5 +432,13 @@ export async function deleteProduct(id: number) {
     method: "DELETE",
   });
 }
+export async function healthCheck() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/health`)
+  if (!res.ok) {
+    throw new Error('Health check failed')
+  }
+  return res.json()
+}
+
 
 

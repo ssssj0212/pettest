@@ -1,44 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getMe, getToken, removeToken } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
-  const router = useRouter();
-  const [user, setUser] = useState<{
-    id: number;
-    email: string;
-    name: string;
-    role: string;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: session, status } = useSession();
+  const loading = status === "loading";
 
-  useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    getMe()
-      .then((data) => {
-        setUser({ ...data });
-      })
-      .catch(() => {
-        removeToken();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
-  const handleLogout = () => {
-    removeToken();
-    setUser(null);
-    router.push("/");
-    router.refresh();
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
   };
 
   return (
@@ -51,10 +21,10 @@ export default function Header() {
         <nav className="flex items-center gap-2 sm:gap-4">
           {loading ? (
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#FFB88C] border-t-[#FF6B6B]" />
-          ) : user ? (
+          ) : session?.user ? (
             <>
               <span className="text-sm text-[#8B7355]">
-                {user.name} ({user.role})
+                {session.user.name} ({session.user.email})
               </span>
               <button
                 onClick={handleLogout}
