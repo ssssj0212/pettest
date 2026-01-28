@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import {
@@ -9,7 +10,6 @@ import {
   getReservations,
   getCalendarSummary,
   cancelReservation,
-  getToken,
   type Reservation,
 } from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -19,6 +19,7 @@ type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 export default function ReservationsPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [selectedDate, setSelectedDate] = useState<Value>(new Date());
   const [selectedTime, setSelectedTime] = useState("");
   const [memo, setMemo] = useState("");
@@ -32,8 +33,9 @@ export default function ReservationsPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
+    if (status === "loading") return;
+
+    if (!session) {
       router.push("/login");
       return;
     }
@@ -47,7 +49,7 @@ export default function ReservationsPage() {
       }
     };
     init();
-  }, [currentMonth, router]);
+  }, [session, status, currentMonth, router]);
 
   const loadReservations = async () => {
     try {
