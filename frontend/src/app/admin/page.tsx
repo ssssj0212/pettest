@@ -1,5 +1,5 @@
 "use client";
-
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -21,6 +21,7 @@ import {
 
 export default function AdminPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeTab, setActiveTab] = useState<"dashboard" | "reservations" | "orders" | "users" | "products">("dashboard");
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -39,7 +40,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     checkAdmin();
-  }, []);
+  }, [status]);
 
   useEffect(() => {
     if (activeTab === "dashboard") {
@@ -56,21 +57,18 @@ export default function AdminPage() {
   }, [activeTab]);
 
   const checkAdmin = async () => {
-    const token = getToken();
-    if (!token) {
-      router.push("/login");
+    // 아직 세션 로딩 중이면 아무 것도 하지 않음
+    if (status === "loading") return;
+  
+    // 로그인 안 돼 있으면 NextAuth 로그인으로 보내기
+    if (status === "unauthenticated") {
+      router.push("/api/auth/signin");
       return;
     }
-
-    try {
-      const user = await getMe();
-      if (user.role !== "ADMIN") {
-        router.push("/");
-        return;
-      }
-    } catch {
-      router.push("/login");
-    }
+  
+    // ✅ 여기서부터는 로그인은 된 상태
+    // 일단은 "로그인 화면으로 다시 튕기는 문제"를 막는 게 목적이라
+    // role 체크는 Step 3에서 붙일게.
   };
 
   const loadDashboard = async () => {

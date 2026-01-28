@@ -121,4 +121,54 @@ def login(
 def get_me(current_user: models.User = Depends(get_current_active_user)):
     """현재 로그인한 사용자 정보"""
     return current_user
+from fastapi import Header, HTTPException
+from typing import Optional
+import requests
 
+def get_current_admin_user(authorization: Optional[str] = Header(None)):
+    raise HTTPException(status_code=418, detail="HIT GOOGLE ADMIN AUTH")
+
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing Bearer token")
+
+    access_token = authorization.split(" ", 1)[1].strip()
+
+    r = requests.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10,
+    )
+
+    if r.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    userinfo = r.json()
+
+    ADMIN_EMAILS = {
+        "ssssj0212@gmail.com",
+    }
+
+    if userinfo.get("email") not in ADMIN_EMAILS:
+        raise HTTPException(status_code=403, detail="Not an admin")
+
+    return userinfo
+from fastapi import Header, HTTPException
+from typing import Optional
+import requests
+
+def require_google_user(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing Bearer token")
+
+    access_token = authorization.split(" ", 1)[1].strip()
+
+    r = requests.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10,
+    )
+
+    if r.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    return r.json()

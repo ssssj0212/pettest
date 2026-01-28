@@ -41,6 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      ;(session as any).accessToken = (token as any).accessToken
       // 세션 커스터마이징
       if (token) {
         session.user = {
@@ -58,6 +59,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/login",
   },
 });
+
+
+
+
+
+
 
 
 

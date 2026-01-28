@@ -89,6 +89,38 @@ def get_current_admin_user(
     return current_user
 
 
+# ===============================
+# Google Bearer token auth helper
+# ===============================
+from fastapi import Header
+import requests
+
+
+def require_google_user(authorization: Optional[str] = Header(None)):
+    """Google OAuth Bearer 토큰 검증"""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing Bearer token")
+
+    access_token = authorization.split(" ", 1)[1].strip()
+
+    r = requests.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10,
+    )
+
+    if r.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    return r.json()
+
+
+
+
+
+
+
+
 
 
 
