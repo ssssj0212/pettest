@@ -1,11 +1,17 @@
 import Link from "next/link";
-import { getHealth } from "@/lib/api";
 
 export default async function Home() {
   let health: string | null = null;
   try {
-    const res = await getHealth();
-    health = res.status;
+    // Next.js API Routes 사용 (/api/health)
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE || ""}/api/health`,
+      { cache: "no-store" }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      health = data.status;
+    }
   } catch {
     health = null;
   }
