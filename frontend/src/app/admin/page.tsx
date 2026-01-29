@@ -21,7 +21,7 @@ import {
 
 export default function AdminPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session,status  } = useSession();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activeTab, setActiveTab] = useState<"dashboard" | "reservations" | "orders" | "users" | "products">("dashboard");
   const [reservations, setReservations] = useState<Reservation[]>([]);

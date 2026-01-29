@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { Pool } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
 
 // PrismaClient는 싱글톤으로 관리
@@ -11,13 +10,16 @@ const globalForPrisma = globalThis as unknown as {
 
 const createPrismaClient = () => {
   const databaseUrl = process.env.DATABASE_URL
-  
+
   if (!databaseUrl) {
     throw new Error('DATABASE_URL is not set')
   }
 
-  const pool = new Pool({ connectionString: databaseUrl })
-  const adapter = new PrismaNeon(pool)
+  // ✅ Pool 인스턴스를 만들지 말고
+  // ✅ PrismaNeon에 config 객체를 바로 전달
+  const adapter = new PrismaNeon({
+    connectionString: databaseUrl,
+  })
 
   return new PrismaClient({
     adapter,
