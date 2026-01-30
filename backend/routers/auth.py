@@ -1,108 +1,157 @@
-from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+from datetime import datetime, timedelta
+from passlib.context import CryptContext
+import jwt
 
-from ..database import get_db
-from .. import models, schemas
-from ..auth import (
-    verify_password,
-    get_password_hash,
-    create_access_token,
-    get_current_active_user,
-    ACCESS_TOKEN_EXPIRE_MINUTES,
-)
+from database import get_db
+import models
+import os
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+# 비밀번호 해싱
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-@router.post("/register", response_model=schemas.UserRead)
-def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
-    """회원가입"""
-    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
-    if existing:
+# JWT 설정
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
+
+
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    phone: Optional[str] = None
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: dict
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """비밀번호 검증"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str) -> str:
+    """비밀번호 해싱"""
+    return pwd_context.hash(password)
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """JWT 토큰 생성"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
+@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
+def register(user_data: UserRegister, db: Session = Depends(get_db)):
+    """
+    이메일/비밀번호로 회원가입
+    - Google 이메일로 가입하면 나중에 Google로도 로그인 가능
+    """
+    # 1. 이메일 중복 확인
+    existing_user = db.query(models.User).filter(models.User.email == user_data.email).first()
+    if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="이미 존재하는 이메일입니다.",
+            detail="이미 등록된 이메일입니다."
         )
 
-    user = models.User(
-        email=user_in.email,
-        password_hash=get_password_hash(user_in.password),
-        name=user_in.name,
-        phone=user_in.phone,
-        role="USER",  # 기본값은 USER
+    # 2. 비밀번호 해싱
+    hashed_password = get_password_hash(user_data.password)
+
+    # 3. 사용자 생성 (Neon DB camelCase 컬럼만 사용)
+    new_user = models.User(
+        email=user_data.email,
+        password_hash=hashed_password,
+        name=user_data.name,
+        phone=user_data.phone,
+        role="USER",
+        is_active=True,
     )
-    db.add(user)
+    db.add(new_user)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(new_user)
 
-
-@router.post("/login")
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    request: Request = None,
-    db: Session = Depends(get_db),
-):
-    """로그인 (JWT 토큰 발급)"""
-    user = db.query(models.User).filter(models.User.email == form_data.username).first()
-    
-    # IP 주소와 User-Agent 가져오기
-    ip_address = None
-    user_agent = None
-    if request:
-        ip_address = request.client.host if request.client else None
-        user_agent = request.headers.get("user-agent", None)
-    
-    # 로그인 시도 기록 (실패 시)
-    if not user or not verify_password(form_data.password, user.password_hash):
-        login_log = models.Login(
-            user_id=user.id if user else None,
-            success=False,
-            failure_reason="이메일 또는 비밀번호가 올바르지 않습니다.",
-            ip_address=ip_address,
-            user_agent=user_agent,
-        )
-        db.add(login_log)
-        db.commit()
-        
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="이메일 또는 비밀번호가 올바르지 않습니다.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if not user.is_active:
-        login_log = models.Login(
-            user_id=user.id,
-            success=False,
-            failure_reason="비활성화된 사용자입니다.",
-            ip_address=ip_address,
-            user_agent=user_agent,
-        )
-        db.add(login_log)
-        db.commit()
-        
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="비활성화된 사용자입니다.",
-        )
-
-    # 로그인 성공 기록
-    login_log = models.Login(
-        user_id=user.id,
-        success=True,
-        ip_address=ip_address,
-        user_agent=user_agent,
-    )
-    db.add(login_log)
-    db.commit()
-
+    # 4. JWT 토큰 생성
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id, "role": user.role},
-        expires_delta=access_token_expires,
+        data={"sub": new_user.email, "user_id": new_user.id},
+        expires_delta=access_token_expires
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": new_user.id,
+            "email": new_user.email,
+            "name": new_user.name,
+            "role": new_user.role,
+        }
+    }
+
+
+@router.post("/login", response_model=Token)
+def login(user_data: UserLogin, db: Session = Depends(get_db)):
+    """
+    이메일/비밀번호로 로그인
+    - Google로 가입한 사용자도 비밀번호를 설정하면 이메일로 로그인 가능
+    """
+    # 1. 사용자 조회
+    user = db.query(models.User).filter(models.User.email == user_data.email).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="이메일 또는 비밀번호가 올바르지 않습니다."
+        )
+
+    # 2. 비밀번호 확인
+    if not user.password_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google로 가입한 계정입니다. Google 로그인을 사용하세요."
+        )
+    
+    if not verify_password(user_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="이메일 또는 비밀번호가 올바르지 않습니다."
+        )
+
+    # 3. 활성 사용자 확인
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="비활성화된 계정입니다."
+        )
+
+    db.commit()
+
+    # 5. JWT 토큰 생성
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email, "user_id": user.id},
+        expires_delta=access_token_expires
     )
 
     return {
@@ -113,62 +162,75 @@ def login(
             "email": user.email,
             "name": user.name,
             "role": user.role,
-        },
+        }
     }
 
 
-@router.get("/me", response_model=schemas.UserRead)
-def get_me(current_user: models.User = Depends(get_current_active_user)):
-    """현재 로그인한 사용자 정보"""
-    return current_user
-from fastapi import Header, HTTPException
-from typing import Optional
-import requests
+@router.post("/logout")
+def logout(email: EmailStr, db: Session = Depends(get_db)):
+    """
+    로그아웃 - DB 플래그 업데이트
+    """
+    user = db.query(models.User).filter(models.User.email == email).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="사용자를 찾을 수 없습니다."
+        )
 
-def get_current_admin_user(authorization: Optional[str] = Header(None)):
-    raise HTTPException(status_code=418, detail="HIT GOOGLE ADMIN AUTH")
+    db.commit()
 
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing Bearer token")
-
-    access_token = authorization.split(" ", 1)[1].strip()
-
-    r = requests.get(
-        "https://www.googleapis.com/oauth2/v3/userinfo",
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=10,
-    )
-
-    if r.status_code != 200:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
-
-    userinfo = r.json()
-
-    ADMIN_EMAILS = {
-        "ssssj0212@gmail.com",
+    return {
+        "message": "로그아웃 성공",
+        "email": email,
+        "is_logged_in": False
     }
 
-    if userinfo.get("email") not in ADMIN_EMAILS:
-        raise HTTPException(status_code=403, detail="Not an admin")
 
-    return userinfo
-from fastapi import Header, HTTPException
-from typing import Optional
-import requests
+@router.post("/set-password")
+def set_password(
+    email: EmailStr,
+    new_password: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Google로 가입한 사용자가 비밀번호를 설정
+    - 설정 후 Google 로그인 + 이메일 로그인 둘 다 가능
+    """
+    user = db.query(models.User).filter(models.User.email == email).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="사용자를 찾을 수 없습니다."
+        )
 
-def require_google_user(authorization: Optional[str] = Header(None)):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing Bearer token")
+    user.password_hash = get_password_hash(new_password)
+    db.commit()
 
-    access_token = authorization.split(" ", 1)[1].strip()
+    return {
+        "message": "비밀번호가 설정되었습니다. 이제 Google과 이메일 로그인 모두 사용 가능합니다."
+    }
 
-    r = requests.get(
-        "https://www.googleapis.com/oauth2/v3/userinfo",
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=10,
-    )
 
-    if r.status_code != 200:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
+@router.get("/check-auth-provider/{email}")
+def check_auth_provider(email: EmailStr, db: Session = Depends(get_db)):
+    """
+    사용자의 로그인 방법 확인
+    - 프론트엔드에서 어떤 로그인 방법을 제공할지 결정
+    """
+    user = db.query(models.User).filter(models.User.email == email).first()
+    
+    if not user:
+        return {
+            "exists": False,
+            "has_password": False,
+            "message": "등록되지 않은 이메일입니다."
+        }
 
-    return r.json()
+    return {
+        "exists": True,
+        "has_password": bool(user.password_hash and user.password_hash.strip()),
+        "message": "이메일 로그인을 사용하세요." if user.password_hash else "Google 로그인을 사용하세요."
+    }

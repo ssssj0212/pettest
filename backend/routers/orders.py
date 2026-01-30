@@ -3,9 +3,9 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ..database import get_db
-from .. import models, schemas
-from ..auth import get_current_active_user
+from database import get_db
+import models, schemas
+from auth import get_current_active_user
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 

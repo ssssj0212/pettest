@@ -1,6 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+
 
 # 환경변수에서 DB URL 읽기
 # PostgreSQL (Neon): postgresql+psycopg://user:password@host:5432/dbname

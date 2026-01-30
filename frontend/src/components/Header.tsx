@@ -8,6 +8,11 @@ export default function Header() {
   const loading = status === "loading";
 
   const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+    } catch {
+      // 백엔드 호출 실패해도 클라이언트 로그아웃 진행
+    }
     await signOut({ callbackUrl: "/" });
   };
 

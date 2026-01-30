@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 import bcrypt
 
 from .database import SessionLocal
-from . import models
+import models
 
 
 def seed_data(db: Session):

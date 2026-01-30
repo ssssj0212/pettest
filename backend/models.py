@@ -2,21 +2,28 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, N
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from .database import Base
+from database import Base
 
 
 class User(Base):
+    """Neon DB는 Prisma 생성 → camelCase 컬럼명. SQLAlchemy에서 name으로 매핑."""
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    password_hash = Column(String(255), nullable=False)
+    password_hash = Column("passwordHash", String(255), nullable=True)  # OAuth는 null
     name = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=True)
-    role = Column(String(20), default="USER")  # USER / ADMIN
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, server_default=func.now(), nullable=False)
-    modified_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+    role = Column(String(20), default="USER")
+    is_active = Column("isActive", Boolean, default=True)
+
+    created_at = Column("createdAt", DateTime, server_default=func.now(), nullable=False)
+    modified_at = Column("modifiedAt", DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # 활동 감사 (audit timestamps only)
+    last_login_at = Column("lastLoginAt", DateTime(timezone=True), nullable=True)
+    last_logout_at = Column("lastLogoutAt", DateTime(timezone=True), nullable=True)
+    last_seen_at = Column("lastSeenAt", DateTime(timezone=True), nullable=True)
 
     reservations = relationship("Reservation", back_populates="user")
     orders = relationship("Order", back_populates="user")

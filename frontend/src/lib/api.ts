@@ -3,41 +3,83 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
 
 
-  import { getSession } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
+import { auth } from '@/auth'
 
-  export async function apiFetch(path: string, init: RequestInit = {}) {
-    console.log('apiFetch CALLED:', path)
+/**
+ * API 호출 헬퍼 함수 (서버 사이드에서 accessToken 사용)
+ * 클라이언트에서는 getSession()으로 세션 가져오기
+ */
+export async function apiFetch(path: string, init: RequestInit = {}) {
+  console.log('apiFetch CALLED:', path)
+
+  // 서버 컴포넌트에서 호출 시
+  let token: string | undefined;
   
-    const session = await getSession()
-    const token = (session as any)?.accessToken
-  
-    const headers = new Headers(init.headers)
-    headers.set('Content-Type', 'application/json')
-    if (token) headers.set('Authorization', `Bearer ${token}`)
-  
-    const base = process.env.NEXT_PUBLIC_API_BASE
-  
-    // ✅ 8초 타임아웃
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 8000)
-  
-    try {
-      const res = await fetch(`${base}${path}`, {
-        ...init,
-        headers,
-        signal: controller.signal,
-      })
-  
-      if (!res.ok) {
-        const text = await res.text().catch(() => '')
-        throw new Error(`API ${res.status}: ${text}`)
-      }
-  
-      return res
-    } finally {
-      clearTimeout(timeoutId)
+  if (typeof window === 'undefined') {
+    // Server-side: auth()로 토큰 가져오기
+    const session = await auth() as any;
+    token = session?.accessToken;
+  } else {
+    // Client-side: getSession()으로 토큰 가져오기
+    // ✅ 이제 세션에 accessToken이 없으므로 /me 엔드포인트에서 역으로 가져오기
+    // 대신 백엔드가 Google 토큰을 직접 검증하므로 문제 없음
+    const session = await getSession();
+    if (session) {
+      // 클라이언트에서는 토큰이 필요하면 별도로 관리
+      // 현재는 백엔드에서 자동 생성하므로 불필요
     }
   }
+
+  const headers = new Headers(init.headers)
+  headers.set('Content-Type', 'application/json')
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+
+  const base = process.env.NEXT_PUBLIC_API_BASE
+
+  // ✅ 8초 타임아웃
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 8000)
+
+  try {
+    const res = await fetch(`${base}${path}`, {
+      ...init,
+      headers,
+      signal: controller.signal,
+    })
+
+    if (!res.ok) {
+      // ✅ 에러 메시지 필터링
+      const contentType = res.headers.get("content-type");
+      let errorMessage = "요청을 처리할 수 없습니다.";
+      
+      try {
+        if (contentType?.includes("application/json")) {
+          const errorData = await res.json();
+          errorMessage = errorData.detail || errorData.message || errorMessage;
+        }
+      } catch {
+        // JSON 파싱 실패 시 기본 메시지 사용
+      }
+      
+      // 개발 환경에서만 상세 정보
+      if (process.env.NODE_ENV === "development") {
+        console.error(`API Error ${res.status}:`, errorMessage);
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    return res
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('요청 시간이 초과되었습니다. 다시 시도해주세요.');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
   
 
 // 토큰 관리 (클라이언트 사이드)

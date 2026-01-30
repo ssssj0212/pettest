@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
-from ..database import get_db
-from .. import models, schemas
-from ..auth import get_current_active_user, get_current_admin_user
+from database import get_db
+import models, schemas
+from auth import get_current_active_user, get_current_admin_user
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 

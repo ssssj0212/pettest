@@ -1,0 +1,332 @@
+# Cursor Rules for Reservation & Shop Project
+
+## 🎯 프로젝트 개요
+- Next.js 15 (App Router) + FastAPI 풀스택 애플리케이션
+- Google OAuth 기반 인증 (NextAuth.js)
+- PostgreSQL 데이터베이스
+- 예약, 주문, 리뷰, 갤러리 관리 시스템
+
+## 🔐 보안 및 인증 규칙
+
+### 1. NextAuth 설정
+- **절대 금지**: 세션에 `accessToken` 노출
+  ```typescript
+  // ❌ Bad
+  (session as any).accessToken = (token as any).accessToken
+  
+  // ✅ Good
+  session.user = { id, email, name } // 필요한 정보만
+  ```
+
+- **필수**: 환경변수 검증
+  ```typescript
+  // 서버 시작 시 필수 환경변수 확인
+  if (!process.env.NEXTAUTH_SECRET || NEXTAUTH_SECRET.length < 32) {
+    throw new Error("NEXTAUTH_SECRET 설정 필요");
+  }
+  ```
+
+- **세션 설정**: 타임아웃 1일, 갱신 1시간
+  ```typescript
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60 * 24,
+    updateAge: 60 * 60,
+  }
+  ```
+
+### 2. 백엔드 인증
+- **관리자 API**: 반드시 `require_google_admin_user` 사용
+  ```python
+  @router.get("/admin/dashboard")
+  def get_dashboard(
+      current_user: models.User = Depends(require_google_admin_user),
+      db: Session = Depends(get_db),
+  ):
+  ```
+
+- **일반 사용자 API**: `require_google_user` 사용
+  ```python
+  @router.get("/reservations")
+  def get_reservations(
+      current_user = Depends(require_google_user),
+      db: Session = Depends(get_db),
+  ):
+  ```
+
+- **Google 토큰 검증**: tokeninfo API 사용
+  ```python
+  # ✅ Good
+  r = requests.get(
+      "https://www.googleapis.com/oauth2/v3/tokeninfo",
+      params={"access_token": access_token},
+  )
+  
+  # ❌ Bad: userinfo만으로는 불충분
+  ```
+
+### 3. 환경변수 관리
+- **절대 금지**: 하드코딩된 기본값
+  ```python
+  # ❌ Bad
+  SECRET_KEY = os.getenv("SECRET_KEY", "changeme-secret-key")
+  
+  # ✅ Good
+  SECRET_KEY = os.getenv("SECRET_KEY")
+  if not SECRET_KEY:
+      raise ValueError("SECRET_KEY 필수")
+  ```
+
+- **프로덕션 검증**: 취약한 키워드 차단
+  ```python
+  weak_keywords = ["changeme", "secret", "password", "example", "test"]
+  if any(kw in SECRET_KEY.lower() for kw in weak_keywords):
+      raise ValueError("취약한 SECRET_KEY")
+  ```
+
+### 4. CORS 설정
+- **프로덕션**: 명시적 도메인만 허용
+  ```python
+  # ❌ Bad
+  allow_origins=["*"]
+  
+  # ✅ Good
+  allow_origins=["https://yourdomain.com"]
+  ```
+
+- **검증**: HTTPS 필수 (프로덕션)
+  ```python
+  if ENVIRONMENT == "production":
+      for origin in origins:
+          if not origin.startswith("https://"):
+              raise ValueError(f"HTTPS 필수: {origin}")
+  ```
+
+## 📝 코드 작성 규칙
+
+### 1. TypeScript/Next.js
+- **컴포넌트 분리**: 200줄 초과 시 분리 고려
+- **Props 타입**: 명시적 인터페이스 정의
+  ```typescript
+  interface DashboardTabProps {
+    stats: DashboardStats | null;
+  }
+  ```
+
+- **에러 처리**: 사용자 친화적 메시지
+  ```typescript
+  catch (err) {
+    setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
+  }
+  ```
+
+- **API 호출**: apiFetch 헬퍼 사용
+  ```typescript
+  const data = await apiFetch("/admin/dashboard");
+  ```
+
+### 2. Python/FastAPI
+- **라우터 구조**: 도메인별 분리
+  ```
+  backend/routers/
+  ├── auth.py
+  ├── admin.py
+  ├── reservations.py
+  └── ...
+  ```
+
+- **의존성 주입**: Depends 활용
+  ```python
+  def endpoint(
+      current_user: User = Depends(require_google_admin_user),
+      db: Session = Depends(get_db),
+  ):
+  ```
+
+- **에러 처리**: HTTPException 사용
+  ```python
+  if not user:
+      raise HTTPException(
+          status_code=404,
+          detail="사용자를 찾을 수 없습니다."
+      )
+  ```
+
+### 3. 데이터베이스
+- **ORM 사용**: 직접 SQL 최소화
+  ```python
+  # ✅ Good
+  user = db.query(User).filter(User.email == email).first()
+  
+  # ❌ Bad: SQL Injection 위험
+  db.execute(f"SELECT * FROM users WHERE email = '{email}'")
+  ```
+
+- **트랜잭션**: commit/rollback 명시
+  ```python
+  try:
+      db.add(user)
+      db.commit()
+      db.refresh(user)
+  except Exception:
+      db.rollback()
+      raise
+  ```
+
+## 🧪 테스트 규칙
+
+### 권한 테스트
+```bash
+# 비로그인 사용자
+curl -X GET http://localhost:8000/admin/dashboard
+# 예상: 401 Unauthorized
+
+# 일반 사용자
+curl -X GET http://localhost:8000/admin/dashboard \
+  -H "Authorization: Bearer {user_token}"
+# 예상: 403 Forbidden
+
+# 관리자
+curl -X GET http://localhost:8000/admin/dashboard \
+  -H "Authorization: Bearer {admin_token}"
+# 예상: 200 OK
+```
+
+### 환경변수 테스트
+```bash
+# SECRET_KEY 없이 서버 시작
+unset SECRET_KEY
+python -m uvicorn main:app
+# 예상: ValueError 발생
+
+# 취약한 SECRET_KEY로 시작 (프로덕션)
+export ENVIRONMENT=production
+export SECRET_KEY=changeme-secret
+python -m uvicorn main:app
+# 예상: ValueError 발생
+```
+
+## 📦 의존성 관리
+
+### Frontend
+```bash
+# 새 패키지 추가 시
+npm install <package>
+npm install --save-dev <dev-package>
+
+# package.json 업데이트 후
+npm install
+```
+
+### Backend
+```bash
+# 새 패키지 추가 시
+pip install <package>
+pip freeze | grep <package> >> requirements.txt
+
+# requirements.txt 업데이트 후
+pip install -r requirements.txt
+```
+
+## 🔄 Git 워크플로우
+
+### 커밋 메시지
+```
+feat: 새로운 기능 추가
+fix: 버그 수정
+refactor: 코드 리팩토링
+security: 보안 개선
+docs: 문서 업데이트
+test: 테스트 추가/수정
+```
+
+### 브랜치 전략
+```
+main: 프로덕션 배포
+develop: 개발 메인
+feature/*: 기능 개발
+fix/*: 버그 수정
+security/*: 보안 패치
+```
+
+## 🚀 배포 규칙
+
+### Vercel (Frontend)
+- **환경변수**: Vercel Dashboard에서 설정
+- **시크릿 체크**: GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET
+- **HTTPS**: 자동 (Vercel 제공)
+- **도메인**: NEXTAUTH_URL 업데이트 필수
+
+### 백엔드 배포
+- **환경변수 검증**: 서버 시작 전 확인
+- **HTTPS**: 필수 (Let's Encrypt 등)
+- **CORS**: 프로덕션 도메인만 허용
+- **데이터베이스**: Managed Service 권장
+
+## 📚 참고 자료
+
+### 문서
+- DEBUGGING_REPORT.md: 전체 흐름 및 문제점
+- SECURITY_AUDIT.md: 보안 취약점 및 해결책
+- REFACTORING_SUMMARY.md: 코드 구조 개선
+
+### 보안 체크리스트
+- [ ] 환경변수 모두 설정됨
+- [ ] SECRET 키 강도 검증됨
+- [ ] CORS 적절히 제한됨
+- [ ] 관리자 권한 체크 적용됨
+- [ ] 세션 타임아웃 설정됨
+- [ ] 에러 메시지 필터링됨
+- [ ] HTTPS 사용 (프로덕션)
+- [ ] accessToken 세션에서 제거됨
+
+## ⚠️ 절대 금지 사항
+
+1. **세션에 민감한 정보 저장**
+   - accessToken, refreshToken, password 등
+
+2. **하드코딩된 시크릿**
+   - 코드에 API 키, 비밀번호 포함
+
+3. **CORS "*" 사용** (프로덕션)
+   - 개발 환경에서만 허용
+
+4. **권한 체크 없는 관리자 API**
+   - 모든 admin 엔드포인트에 role 체크 필수
+
+5. **클라이언트 사이드 권한 체크만 사용**
+   - 반드시 백엔드에서도 검증
+
+6. **SQL Injection 가능한 쿼리**
+   - ORM 사용 또는 parameterized query
+
+7. **상세한 에러 메시지 노출** (프로덕션)
+   - 스택 트레이스, DB 정보 등
+
+## 🎓 베스트 프랙티스
+
+### 1. 보안 우선
+- 모든 변경사항에서 보안 영향 고려
+- 의심스러운 경우 차단 (Fail-Safe)
+
+### 2. 명시적 코드
+- 암묵적 동작 최소화
+- 타입 명시 (TypeScript, Python type hints)
+
+### 3. 에러 처리
+- 모든 API 호출에 try-catch
+- 사용자 친화적 메시지
+
+### 4. 테스트
+- 권한 체크 테스트 필수
+- Edge case 고려
+
+### 5. 문서화
+- 복잡한 로직에 주석
+- API 변경 시 문서 업데이트
+
+---
+
+**마지막 업데이트**: 2026-01-29  
+**버전**: 1.0.0  
+**관리자**: Development Team

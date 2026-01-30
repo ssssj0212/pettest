@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ..database import get_db
-from .. import models, schemas
-from ..auth import get_current_admin_user
+from database import get_db
+import models, schemas
+from auth import get_current_admin_user
 
 router = APIRouter(prefix="/gallery", tags=["gallery"])
 

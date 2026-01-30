@@ -1,5 +1,5 @@
 from .database import engine, Base, SessionLocal
-from . import models  # noqa: F401  # models를 import 해야 테이블이 인식됨
+import models  # noqa: F401  # models를 import 해야 테이블이 인식됨
 from .seed_data import seed_data
 
 

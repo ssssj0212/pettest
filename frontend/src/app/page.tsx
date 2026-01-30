@@ -3,9 +3,8 @@ import Link from "next/link";
 export default async function Home() {
   let health: string | null = null;
   try {
-    // Next.js API Routes 사용 (/api/health)
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE || ""}/api/health`,
+     const res = await fetch(
+      "/api/health",
       { cache: "no-store" }
     );
     if (res.ok) {

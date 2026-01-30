@@ -8,6 +8,7 @@ python-jose[cryptography]
 passlib[bcrypt]
 pytest
 httpx
+requests
 python-multipart
 email-validator
 

@@ -3,9 +3,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from ..database import get_db
-from .. import models, schemas
-from ..auth import require_google_user
+from database import get_db
+import models
+import schemas
+from auth import require_google_admin_user
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get("/dashboard")
 def get_dashboard(
-    current_user = Depends(require_google_user),
+    current_user: models.User = Depends(require_google_admin_user),
     db: Session = Depends(get_db),
 ):
     """관리자 대시보드 통계"""
@@ -72,7 +73,7 @@ def get_dashboard(
 def list_all_reservations(
     skip: int = 0,
     limit: int = 50,
-   current_user = Depends(require_google_user),
+    current_user: models.User = Depends(require_google_admin_user),
     db: Session = Depends(get_db),
 ):
     """모든 예약 목록 조회 (관리자만)"""
@@ -90,7 +91,7 @@ def list_all_reservations(
 def list_all_orders(
     skip: int = 0,
     limit: int = 50,
-   current_user = Depends(require_google_user),
+    current_user: models.User = Depends(require_google_admin_user),
     db: Session = Depends(get_db),
 ):
     """모든 주문 목록 조회 (관리자만)"""
@@ -121,7 +122,7 @@ def list_all_orders(
 @router.post("/products", response_model=schemas.ProductRead)
 def create_product(
     product_in: schemas.ProductCreate,
-    current_user = Depends(require_google_user),
+    current_user: models.User = Depends(require_google_admin_user),
     db: Session = Depends(get_db),
 ):
     """상품 생성 (관리자만)"""
@@ -140,7 +141,7 @@ def create_product(
 def update_product(
     product_id: int,
     product_update: schemas.ProductCreate,
-    current_user = Depends(require_google_user),
+    current_user: models.User = Depends(require_google_admin_user),
     db: Session = Depends(get_db),
 ):
     """상품 수정 (관리자만)"""
@@ -160,7 +161,7 @@ def update_product(
 @router.delete("/products/{product_id}")
 def delete_product(
     product_id: int,
-    current_user = Depends(require_google_user),
+    current_user: models.User = Depends(require_google_admin_user),
     db: Session = Depends(get_db),
 ):
     """상품 삭제 (관리자만)"""
@@ -177,7 +178,7 @@ def delete_product(
 def list_all_users(
     skip: int = 0,
     limit: int = 50,
-    current_user = Depends(require_google_user),
+    current_user: models.User = Depends(require_google_admin_user),
     db: Session = Depends(get_db),
 ):
     """모든 사용자 목록 조회 (관리자만)"""
